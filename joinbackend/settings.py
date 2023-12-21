@@ -44,7 +44,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'join',
     'rest_framework.authtoken',
-    'corsheaders'
+    'corsheaders',
+
+
 ]
 
 MIDDLEWARE = [
@@ -139,3 +141,11 @@ REST_FRAMEWORK = {
     ]
 }
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_BACKEND = 'django_smtp_ssl.SSLEmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_HOST = 'smtp.ionos.de'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'noreply@tech-mail.eu'
+EMAIL_HOST_PASSWORD = 'buzkgZGIZT6776iuzgIgi67igI67uz'
