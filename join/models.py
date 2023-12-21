@@ -11,6 +11,8 @@ class Contact(models.Model):
     created_at = models.DateField(default=date.today)
     email = models.EmailField()
     phone_number = models.CharField(max_length=20, blank=True, null=True)
+    hex_color = models.CharField(max_length=10)
+    logogram = models.CharField(max_length=5)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='author_message_set')
     receiver = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='receiver_message_set')
 

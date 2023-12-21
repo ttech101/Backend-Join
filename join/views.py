@@ -48,6 +48,7 @@ class LoginView(ObtainAuthToken):
         return Response({
             'token': token.key,
             'user_id': user.pk,
+            'name' : user.first_name + ' ' + user.last_name,
             'email': user.email,
             'contact': contact_serializer.data,  # Füge das serialisierte Contact-Objekt dem Response hinzu
             'task': task_serializer.data
@@ -106,6 +107,7 @@ def send_confirmation_email(user, confirmation_link):
 def contact_view(request, contact_id=None):
     if request.method == 'GET':
         if contact_id:
+            print(contact_id)
             # GET-Anfrage für ein bestimmtes Kontaktobjekt
             contact = Contact.objects.get(pk=contact_id)
             serializer = ContactSerializer(contact)
@@ -116,9 +118,13 @@ def contact_view(request, contact_id=None):
             serializer = ContactSerializer(contacts, many=True)
             return Response(serializer.data)
 
+
     elif request.method == 'POST':
         # POST-Datenverarbeitungscode
-        serializer = ContactSerializer(data=request.data)
+        author = request.user
+        # receiver = request.data.get('receiver', None)  # Annahme, dass der Schlüssel 'receiver' im request.data vorhanden ist
+        # serializer = ContactSerializer(data={'author': author.id, 'receiver': author.id, 'message': request.data.get('message', '')})
+        serializer = ContactSerializer(data={'author': author.id, 'receiver': author.id, 'email': request.data.get('email'), 'name': request.data.get('name'), 'hex_color': request.data.get('hex_color'), 'logogram': request.data.get('logogram')})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
