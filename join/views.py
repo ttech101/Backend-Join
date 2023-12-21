@@ -1,13 +1,14 @@
 from django.forms import EmailField
 from django.http import HttpResponse
 from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from django.contrib.auth.models import User
 from django.contrib.auth import login
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.forms import UserCreationForm
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -16,23 +17,57 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils.html import strip_tags
+from django.contrib import messages
+from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes,authentication_classes, permission_classes
+from rest_framework.response import Response
+from .models import Contact ,Task
+from .serializers import ContactSerializer ,TaskSerializer
 from .forms import CustomUserCreationForm
+from rest_framework.permissions import IsAuthenticated
 
 # Create your views here.
 
+
 class LoginView(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
-        print('LoginView?')
         serializer = self.serializer_class(data=request.data,
                                            context={'request': request})
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
         token, created = Token.objects.get_or_create(user=user)
+
+        # Hier wird das Contact-Objekt für den eingeloggten Benutzer abgerufen
+        contacts = Contact.objects.filter(author=user)
+        tasks = Task.objects.filter(author=user)
+
+        # Hier wird das Contact-Objekt serialisiert
+        contact_serializer = ContactSerializer(contacts, many=True)
+        task_serializer = TaskSerializer(tasks, many=True)
+
         return Response({
             'token': token.key,
             'user_id': user.pk,
-            'email': user.email
+            'email': user.email,
+            'contact': contact_serializer.data,  # Füge das serialisierte Contact-Objekt dem Response hinzu
+            'task': task_serializer.data
         })
+
+
+
+# class LoginView(ObtainAuthToken):
+#     def post(self, request, *args, **kwargs):
+#         print('LoginView?')
+#         serializer = self.serializer_class(data=request.data,
+#                                            context={'request': request})
+#         serializer.is_valid(raise_exception=True)
+#         user = serializer.validated_data['user']
+#         token, created = Token.objects.get_or_create(user=user)
+#         return Response({
+#             'token': token.key,
+#             'user_id': user.pk,
+#             'email': user.email
+#         })
 
 
 User = get_user_model()
@@ -65,8 +100,57 @@ def send_confirmation_email(user, confirmation_link):
 
 
 
-@csrf_exempt
+@api_view(['GET', 'POST', 'PUT', 'DELETE'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def contact_view(request, contact_id=None):
+    if request.method == 'GET':
+        if contact_id:
+            # GET-Anfrage für ein bestimmtes Kontaktobjekt
+            contact = Contact.objects.get(pk=contact_id)
+            serializer = ContactSerializer(contact)
+            return Response(serializer.data)
+        else:
+            # GET-Anfrage für alle Kontaktobjekte
+            contacts = Contact.objects.all()
+            serializer = ContactSerializer(contacts, many=True)
+            return Response(serializer.data)
 
+    elif request.method == 'POST':
+        # POST-Datenverarbeitungscode
+        serializer = ContactSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method == 'PUT':
+        # PUT-Datenverarbeitungscode für ein bestimmtes Kontaktobjekt
+        contact = Contact.objects.get(pk=contact_id)
+        serializer = ContactSerializer(contact, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method == 'DELETE':
+        # DELETE-Datenverarbeitungscode für ein bestimmtes Kontaktobjekt
+        contact = Contact.objects.get(pk=contact_id)
+        contact.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
+
+
+
+
+
+
+
+
+
+@csrf_exempt
 def register(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
