@@ -1,16 +1,31 @@
-<!-- templates/registration/activation_complete.html -->
-<!DOCTYPE html>
 <html lang="en">
 
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Activation Complete</title>
+        <title>Countdown Redirect</title>
     </head>
 
     <body>
-        <h1>Aktivierung abgeschlossen</h1>
-        <p>Dein Account wurde erfolgreich aktiviert. Du bist jetzt eingeloggt.</p>
+        <script>
+            function startCountdown() {
+                var countdownTime = 5;
+                function updateCountdown() {
+                    document.getElementById('countdown').innerHTML = countdownTime;
+                    countdownTime--;
+                    if (countdownTime < 0) {
+                        window.location.href = 'https://join.tech-mail.eu';
+                    }
+                }
+                setInterval(updateCountdown, 1000);
+            }
+            window.onload = startCountdown;
+        </script>
+        <h1 style="text-align: center">Activation Completed</h1>
+        <h4 style="text-align: center">Your account has been successfully activated.</h4>
+        <p style="text-align: center">You will be redirected to the Join Login in
+            <b><span id="countdown">5</span></b> seconds.
+        </p>
     </body>
 
 </html>

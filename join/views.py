@@ -1,4 +1,4 @@
-from django.forms import EmailField
+from django.core.mail import EmailMessage
 from django.http import HttpResponse, JsonResponse
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authentication import TokenAuthentication
@@ -183,7 +183,6 @@ def task_view(request, task_id=None):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-
 @api_view(['POST',])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -194,8 +193,6 @@ def delete_current_user(request):
         return JsonResponse({'success': True})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
-
-
 
 
 @csrf_exempt
@@ -209,19 +206,24 @@ def register(request):
 
             # Send confirmation email
             current_site = get_current_site(request)
-            subject = 'Activate your account'
+            subject = 'Activate your account for Join'
             message = render_to_string('registration_confirmation_email.html', {
                 'user': user,
                 'confirmation_link': f"http://{current_site.domain}/activate/{urlsafe_base64_encode(force_bytes(user.pk))}/{default_token_generator.make_token(user)}",
             })
-            user.email_user(subject, message)
-            return HttpResponse("Your response und nachricht sollte gesendet sein")
-            # return render(request, 'registration/registration_complete.html', {'user': user})
+
+            email = EmailMessage(subject, message, to=[user.email])
+            email.content_subtype = 'html'  # Setze den Inhaltstyp auf HTML
+
+            try:
+                email.send()
+                return HttpResponse("Your response und Nachricht sollten gesendet sein")
+            except Exception as e:
+                return HttpResponse(f"Error sending email: {str(e)}")
         else:
             print(form.errors)
     else:
         form = CustomUserCreationForm()
-    return HttpResponse("Your responsesss")
-    # return render(request, 'registration/register.html', {'form': form})
+    return HttpResponse("Your response")
 
 
