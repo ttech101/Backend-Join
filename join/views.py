@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.mail import EmailMessage
 from django.http import HttpResponse, JsonResponse
 from rest_framework.authtoken.views import ObtainAuthToken
@@ -21,12 +22,18 @@ from django.contrib import messages
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes,authentication_classes, permission_classes
 from rest_framework.response import Response
-from .models import Contact ,Task
+from .models import Contact, PasswordResetToken ,Task
 from .serializers import ContactSerializer ,TaskSerializer
 from .forms import CustomUserCreationForm
 from rest_framework.permissions import IsAuthenticated
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import PasswordResetView, PasswordResetConfirmView
+from rest_framework.permissions import AllowAny
+from django.utils.crypto import get_random_string
+from django.contrib.auth.hashers import make_password
+from django.shortcuts import get_object_or_404
+
 
 # Create your views here.
 
@@ -183,6 +190,7 @@ def task_view(request, task_id=None):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+
 @api_view(['POST',])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -193,7 +201,6 @@ def delete_current_user(request):
         return JsonResponse({'success': True})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
-
 
 @csrf_exempt
 def register(request):
@@ -227,3 +234,68 @@ def register(request):
     return HttpResponse("Your response")
 
 
+class CustomPasswordResetView(PasswordResetView):
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        # Hier kannst du benutzerdefinierte Aktionen hinzufügen, z.B. eine Erfolgsmeldung anzeigen
+        messages.success(self.request, 'Password reset email sent successfully!')
+        return response
+
+
+@api_view(['POST',])
+@permission_classes([AllowAny])  # Erlaubt nicht authentifizierten Zugriff
+def reset_password(request):
+    if request.method == 'POST':
+        email = request.data.get('email')  # Ändere dies von request.POST auf request.data
+        print(user)
+
+        # Überprüfe, ob die E-Mail-Adresse im System existiert
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'Diese E-Mail-Adresse existiert nicht im System.'}, status=400)
+
+        # Generiere einen eindeutigen Token für die Passwortrücksetzung
+        token = get_random_string(length=32)
+
+        # Setze den Token im Benutzermodell (kannst du anpassen, je nachdem wie dein Modell strukturiert ist)
+        user.reset_password_token = token
+        user.save()
+
+        # Baue den Rücksetzungslink
+        reset_link = f"{settings.FRONTEND_URL}/html/reset-pass.html?password-reset&token={token}"
+
+        # Sende die Passwortrücksetzungs-E-Mail
+        subject = 'Passwort zurücksetzen'
+        message = f'Klicken Sie auf den Link, um Ihr Passwort zurückzusetzen: {reset_link}'
+        from_email = settings.DEFAULT_FROM_EMAIL
+        recipient_list = [email]
+
+        send_mail(subject, message, from_email, recipient_list)
+
+        return JsonResponse({'success': True})
+    else:
+        return JsonResponse({'error': 'Ungültige Anfrage'}, status=400)
+
+
+@api_view(['POST',])
+@permission_classes([AllowAny])
+def change_password(request):
+    if request.method == 'POST':
+        token = request.data.get('token')
+        password = request.data.get('password')
+
+        # Überprüfe, ob der Token gültig ist
+        token_obj = get_object_or_404(PasswordResetToken, reset_password_token=token)
+        user = token_obj.user
+
+        # Setze das neue Passwort für den Benutzer
+        user.set_password(password)
+        user.save()
+
+        # Lösche den Token-Eintrag
+        token_obj.delete()
+
+        return JsonResponse({'success': True})
+    else:
+        return JsonResponse({'error': 'Ungültige Anfrage'}, status=400)

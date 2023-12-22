@@ -150,3 +150,5 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'noreply@tech-mail.eu'
 EMAIL_HOST_PASSWORD = 'buzkgZGIZT6776iuzgIgi67igI67uz'
+
+FRONTEND_URL = 'http://127.0.0.1:5500'

@@ -1,8 +1,7 @@
-
-
 from datetime import date
 from django.conf import settings
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
 
@@ -31,3 +30,7 @@ class Task(models.Model):
     task_board = models.CharField(max_length=40,null=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='authored_tasks')
     receiver = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='received_tasks')
+
+class PasswordResetToken(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    reset_password_token = models.CharField(max_length=255, blank=True, null=True)
