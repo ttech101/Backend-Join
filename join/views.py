@@ -243,11 +243,10 @@ class CustomPasswordResetView(PasswordResetView):
 
 
 @api_view(['POST',])
-@permission_classes([AllowAny])  # Erlaubt nicht authentifizierten Zugriff
+@permission_classes([AllowAny])
 def reset_password(request):
     if request.method == 'POST':
-        email = request.data.get('email')  # Ändere dies von request.POST auf request.data
-        print(user)
+        email = request.data.get('email')
 
         # Überprüfe, ob die E-Mail-Adresse im System existiert
         try:
@@ -258,9 +257,10 @@ def reset_password(request):
         # Generiere einen eindeutigen Token für die Passwortrücksetzung
         token = get_random_string(length=32)
 
-        # Setze den Token im Benutzermodell (kannst du anpassen, je nachdem wie dein Modell strukturiert ist)
-        user.reset_password_token = token
-        user.save()
+        # Erstelle oder aktualisiere den Token im PasswordResetToken-Modell
+        password_reset_token, created = PasswordResetToken.objects.get_or_create(user=user)
+        password_reset_token.reset_password_token = token
+        password_reset_token.save()
 
         # Baue den Rücksetzungslink
         reset_link = f"{settings.FRONTEND_URL}/html/reset-pass.html?password-reset&token={token}"

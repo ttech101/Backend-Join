@@ -15,8 +15,6 @@ class Contact(models.Model):
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='author_message_set')
     receiver = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='receiver_message_set')
 
-
-
 class Task(models.Model):
     headline = models.CharField(max_length=150,null=True)
     text = models.CharField(max_length=500,null=True)
