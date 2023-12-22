@@ -45,8 +45,6 @@ INSTALLED_APPS = [
     'join',
     'rest_framework.authtoken',
     'corsheaders',
-
-
 ]
 
 MIDDLEWARE = [

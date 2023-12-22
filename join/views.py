@@ -1,5 +1,5 @@
 from django.forms import EmailField
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
@@ -25,6 +25,8 @@ from .models import Contact ,Task
 from .serializers import ContactSerializer ,TaskSerializer
 from .forms import CustomUserCreationForm
 from rest_framework.permissions import IsAuthenticated
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 
@@ -53,22 +55,6 @@ class LoginView(ObtainAuthToken):
             'contact': contact_serializer.data,  # Füge das serialisierte Contact-Objekt dem Response hinzu
             'task': task_serializer.data
         })
-
-
-
-# class LoginView(ObtainAuthToken):
-#     def post(self, request, *args, **kwargs):
-#         print('LoginView?')
-#         serializer = self.serializer_class(data=request.data,
-#                                            context={'request': request})
-#         serializer.is_valid(raise_exception=True)
-#         user = serializer.validated_data['user']
-#         token, created = Token.objects.get_or_create(user=user)
-#         return Response({
-#             'token': token.key,
-#             'user_id': user.pk,
-#             'email': user.email
-#         })
 
 
 User = get_user_model()
@@ -114,17 +100,15 @@ def contact_view(request, contact_id=None):
             return Response(serializer.data)
         else:
             # GET-Anfrage für alle Kontaktobjekte
-            contacts = Contact.objects.all()
-            serializer = ContactSerializer(contacts, many=True)
-            return Response(serializer.data)
+            contacts = Contact.objects.filter(author=request.user)
+            contact_serializer = ContactSerializer(contacts, many=True)
+            return Response(contact_serializer.data)
 
 
     elif request.method == 'POST':
         # POST-Datenverarbeitungscode
         author = request.user
-        # receiver = request.data.get('receiver', None)  # Annahme, dass der Schlüssel 'receiver' im request.data vorhanden ist
-        # serializer = ContactSerializer(data={'author': author.id, 'receiver': author.id, 'message': request.data.get('message', '')})
-        serializer = ContactSerializer(data={'author': author.id, 'receiver': author.id, 'email': request.data.get('email'), 'name': request.data.get('name'), 'hex_color': request.data.get('hex_color'), 'logogram': request.data.get('logogram')})
+        serializer = ContactSerializer(data={'author': author.id, 'receiver': author.id, 'email': request.data.get('email'), 'name': request.data.get('name'), 'hex_color': request.data.get('hex_color'), 'logogram': request.data.get('logogram'), 'phone_number': request.data.get('phone_number')})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -132,8 +116,9 @@ def contact_view(request, contact_id=None):
 
     elif request.method == 'PUT':
         # PUT-Datenverarbeitungscode für ein bestimmtes Kontaktobjekt
+        author = request.user
         contact = Contact.objects.get(pk=contact_id)
-        serializer = ContactSerializer(contact, data=request.data)
+        serializer = ContactSerializer(contact, data={'author': author.id, 'receiver': author.id, 'email': request.data.get('email'), 'name': request.data.get('name'), 'hex_color': request.data.get('hex_color'), 'logogram': request.data.get('logogram'), 'phone_number': request.data.get('phone_number')})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -146,12 +131,69 @@ def contact_view(request, contact_id=None):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+@api_view(['GET', 'POST', 'PUT', 'DELETE'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def task_view(request, task_id=None):
+    if request.method == 'GET':
+        if task_id:
+            print(task_id)
+            # GET-Anfrage für ein bestimmtes Kontaktobjekt
+            task = Task.objects.get(pk=task_id)
+            serializer = TaskSerializer(task)
+            return Response(serializer.data)
+        else:
+            # GET-Anfrage für alle Kontaktobjekte
+            tasks = Task.objects.filter(author=request.user)
+            task_serializer = TaskSerializer(tasks, many=True)
+            return Response(task_serializer.data)
+
+
+    elif request.method == 'POST':
+        # POST-Datenverarbeitungscode
+        author = request.user
+        data = request.data.copy()  # Kopiere die Daten, um sie zu ändern
+        # Füge 'author' und 'receiver' zu den Daten hinzu
+        data['author'] = author.id
+        data['receiver'] = author.id
+
+        serializer = TaskSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method == 'PUT':
+        # PUT-Datenverarbeitungscode für ein bestimmtes Kontaktobjekt
+        author = request.user
+        task = Task.objects.get(pk=task_id)
+        data = request.data.copy()  # Kopiere die Daten, um sie zu ändern
+        data['author'] = author.id
+        data['receiver'] = author.id
+        serializer = TaskSerializer(task, data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method == 'DELETE':
+        # DELETE-Datenverarbeitungscode für ein bestimmtes Kontaktobjekt
+        task = Task.objects.get(pk=task_id)
+        task.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 
-
-
-
+@api_view(['POST',])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def delete_current_user(request):
+    user = request.user
+    try:
+        user.delete()
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
 
 
 
