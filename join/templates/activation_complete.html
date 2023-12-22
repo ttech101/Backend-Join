@@ -14,7 +14,7 @@
                     document.getElementById('countdown').innerHTML = countdownTime;
                     countdownTime--;
                     if (countdownTime < 0) {
-                        window.location.href = 'https://join.tech-mail.eu';
+                        window.location.href = '{{ url }}';
                     }
                 }
                 setInterval(updateCountdown, 1000);

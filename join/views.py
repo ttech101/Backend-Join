@@ -76,9 +76,8 @@ def activate(request, uidb64, token):
     if user is not None and default_token_generator.check_token(user, token):
         user.is_active = True
         user.save()
-        # Logge den Benutzer automatisch ein
-        login(request, user)
-        return render(request, 'activation_complete.html')
+        url = settings.FRONTEND_URL
+        return render(request, 'activation_complete.html', {'url': url})
     else:
         return render(request, 'activation_failed.html')
 
@@ -267,11 +266,12 @@ def reset_password(request):
 
         # Sende die Passwortrücksetzungs-E-Mail
         subject = 'Passwort zurücksetzen'
-        message = f'Klicken Sie auf den Link, um Ihr Passwort zurückzusetzen: {reset_link}'
+        # Nutzen Sie nun die render_to_string-Funktion, um eine HTML-Vorlage zu rendern
+        message = render_to_string('password_reset_email.html', {'reset_link': reset_link})
         from_email = settings.DEFAULT_FROM_EMAIL
         recipient_list = [email]
 
-        send_mail(subject, message, from_email, recipient_list)
+        send_mail(subject, message, from_email, recipient_list, html_message=message)
 
         return JsonResponse({'success': True})
     else:
