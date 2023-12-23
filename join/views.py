@@ -22,6 +22,7 @@ from django.contrib import messages
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes,authentication_classes, permission_classes
 from rest_framework.response import Response
+from .service import create_first_contact
 from .models import Contact, PasswordResetToken ,Task
 from .serializers import ContactSerializer ,TaskSerializer
 from .forms import CustomUserCreationForm
@@ -80,17 +81,6 @@ def activate(request, uidb64, token):
         return render(request, 'activation_complete.html', {'url': url})
     else:
         return render(request, 'activation_failed.html')
-
-
-def send_confirmation_email(user, confirmation_link):
-    subject = 'Bestätige deine Registrierung'
-    # Verwende render_to_string, um die HTML-E-Mail aus deinem Template zu generieren
-    html_message = render_to_string('registration_confirmation_email.html', {'user': user, 'confirmation_link': confirmation_link})
-    # Extrahiere den reinen Text aus der HTML-E-Mail (für E-Mail-Clients ohne HTML-Unterstützung)
-    plain_message = strip_tags(html_message)
-    # Sende die E-Mail
-    send_mail(subject, plain_message, 'deine_email@example.com', [user.email], html_message=html_message)
-
 
 
 @api_view(['GET', 'POST', 'PUT', 'DELETE'])
@@ -210,6 +200,9 @@ def register(request):
             user.is_active = False
             user.save()
 
+            # Erstelle den ersten Eintrag in den Kontakten
+            create_first_contact(user)
+
             # Send confirmation email
             current_site = get_current_site(request)
             subject = 'Activate your account for Join'
@@ -223,11 +216,12 @@ def register(request):
 
             try:
                 email.send()
-                return HttpResponse("Your response und Nachricht sollten gesendet sein")
+                return JsonResponse({'ok':"You have successfully registered. Please check your email!"})
             except Exception as e:
                 return HttpResponse(f"Error sending email: {str(e)}")
         else:
-            print(form.errors)
+            return JsonResponse({'error': 'Please check the email address'})
+
     else:
         form = CustomUserCreationForm()
     return HttpResponse("Your response")
@@ -251,7 +245,7 @@ def reset_password(request):
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            return JsonResponse({'error': 'Diese E-Mail-Adresse existiert nicht im System.'}, status=400)
+            return JsonResponse({'error': 'This email address does not exist in the system.'})
 
         # Generiere einen eindeutigen Token für die Passwortrücksetzung
         token = get_random_string(length=32)
@@ -273,7 +267,7 @@ def reset_password(request):
 
         send_mail(subject, message, from_email, recipient_list, html_message=message)
 
-        return JsonResponse({'success': True})
+        return JsonResponse({'success': 'We have sent you an email to reset'})
     else:
         return JsonResponse({'error': 'Ungültige Anfrage'}, status=400)
 
