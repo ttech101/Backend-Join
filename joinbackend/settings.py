@@ -27,6 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['join-django.tech-mail.eu','ttech101.pythonanywhere.com']
 CORS_ALLOWED_ORIGINS = ['join-django.tech-mail.eu','ttech101.pythonanywhere.com']
+CORS_ALLOW_ALL_ORIGINS = True
 
 
 # Application definition
