@@ -147,4 +147,4 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'ttechnomeister@gmail.com'
 EMAIL_HOST_PASSWORD = 'edmsbzmeaelkpphh'
 
-FRONTEND_URL = 'join-django.tech-mail.eu'
+FRONTEND_URL = 'https://join-django.tech-mail.eu'
