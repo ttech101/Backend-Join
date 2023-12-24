@@ -311,7 +311,7 @@ def reset_password(request):
         password_reset_token.save()
         reset_link = f"{settings.FRONTEND_URL}/html/reset-pass.html?password-reset&token={token}"
         subject = 'Reset password'
-        message = render_to_string('password_reset_email.html', {'reset_link': reset_link})
+        message = render_to_string('password_reset_email.html', {'user': user,'reset_link': reset_link})
         from_email = settings.DEFAULT_FROM_EMAIL
         recipient_list = [email]
         send_mail(subject, message, from_email, recipient_list, html_message=message)

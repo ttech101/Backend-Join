@@ -138,7 +138,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ),
 }
-DEFAULT_FROM_EMAIL = 'Site Support <noreply@tech-mail.eu>'
+DEFAULT_FROM_EMAIL = 'Site Support'
 SERVER_EMAIL = 'admin@tech-mail.eu'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
