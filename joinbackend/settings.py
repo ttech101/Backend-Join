@@ -27,7 +27,7 @@ DEBUG = False
 
 ALLOWED_HOSTS = ['join-django.tech-mail.eu','ttech101.pythonanywhere.com']
 CORS_ALLOWED_ORIGINS = ['join-django.tech-mail.eu','ttech101.pythonanywhere.com']
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOW_ALL_ORIGINS = True
 
 
 # Application definition
@@ -138,7 +138,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ),
 }
-DEFAULT_FROM_EMAIL = 'noreply@tech-mail.eu'
+DEFAULT_FROM_EMAIL = 'Site Support <noreply@tech-mail.eu>'
 SERVER_EMAIL = 'admin@tech-mail.eu'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
