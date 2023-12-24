@@ -145,4 +145,4 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'noreply@tech-mail.eu'
 EMAIL_HOST_PASSWORD = 'buzkgZGIZT6776iuzgIgi67igI67uz'
 
-FRONTEND_URL = 'https://join-django.tech-mail.eu/'
+FRONTEND_URL = 'join-django.tech-mail.eu'
