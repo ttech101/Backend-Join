@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-lq_5_n$2n94l6hpikgj60o#*_aadkhrfj(d3dvp)4g$xk)zvug'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['join-django.tech-mail.eu','ttech101.pythonanywhere.com']
 CORS_ALLOWED_ORIGINS = ['join-django.tech-mail.eu','ttech101.pythonanywhere.com']
