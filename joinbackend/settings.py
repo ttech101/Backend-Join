@@ -144,7 +144,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'tech76104@gmail.com'
-EMAIL_HOST_PASSWORD = 'buzkgZGIZT6776iuzgIgi67igI67uz'
+EMAIL_HOST_USER = 'ttechnomeister@gmail.com'
+EMAIL_HOST_PASSWORD = 'edmsbzmeaelkpphh'
 
 FRONTEND_URL = 'join-django.tech-mail.eu'
