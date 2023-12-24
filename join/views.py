@@ -107,7 +107,10 @@ def contact_view(request, contact_id=None):
         Returns the serialized contact data if successful, or validation errors if the data is invalid.
         '''
         author = request.user
-        serializer = ContactSerializer(data={'author': author.id, 'receiver': author.id, 'email': request.data.get('email'), 'name': request.data.get('name'), 'hex_color': request.data.get('hex_color'), 'logogram': request.data.get('logogram'), 'phone_number': request.data.get('phone_number')})
+        data = request.data.copy()
+        data['author'] = author.id
+        data['receiver'] = author.id
+        serializer = ContactSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -119,8 +122,11 @@ def contact_view(request, contact_id=None):
         Returns the updated serialized contact data if successful, or validation errors if the data is invalid.
         '''
         author = request.user
-        contact = Contact.objects.get(pk=contact_id)
-        serializer = ContactSerializer(contact, data={'author': author.id, 'receiver': author.id, 'email': request.data.get('email'), 'name': request.data.get('name'), 'hex_color': request.data.get('hex_color'), 'logogram': request.data.get('logogram'), 'phone_number': request.data.get('phone_number')})
+        task = Contact.objects.get(pk=contact_id)
+        data = request.data.copy()
+        data['author'] = author.id
+        data['receiver'] = author.id
+        serializer = ContactSerializer(task, data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
