@@ -5,6 +5,7 @@ from join.views import LoginView, change_password, contact_view, delete_current_
 
 
 urlpatterns = [
+    path('', admin.site.urls),
     path('admin/', admin.site.urls),
     path('login/', LoginView.as_view(), name='login'),
     path('register/', register),
