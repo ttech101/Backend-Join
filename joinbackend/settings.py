@@ -25,12 +25,18 @@ SECRET_KEY = 'django-insecure-lq_5_n$2n94l6hpikgj60o#*_aadkhrfj(d3dvp)4g$xk)zvug
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
+<<<<<<< HEAD
 ALLOWED_HOSTS = ['join-django.tech-mail.eu','ttech101.pythonanywhere.com']
 CORS_ALLOWED_ORIGINS = [
     'https://join-django.tech-mail.eu',
     'https://ttech101.pythonanywhere.com',
     ]
 #CORS_ALLOW_ALL_ORIGINS = True
+=======
+ALLOWED_HOSTS = ['ttech101.pythonanywhere.com']
+CORS_ALLOWED_ORIGINS = ['https://ttech101.pythonanywhere.com','https://join-django.tech-mail.eu',]
+# CORS_ALLOW_ALL_ORIGINS = True
+>>>>>>> e97b32e2761d14f00fac12f0cbae7ef294e329c3
 
 
 # Application definition
