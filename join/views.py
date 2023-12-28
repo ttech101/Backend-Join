@@ -24,6 +24,7 @@ from .forms import CustomUserCreationForm
 from rest_framework.permissions import IsAuthenticated,AllowAny
 from django.contrib.auth.views import PasswordResetView, PasswordResetConfirmView
 from django.utils.crypto import get_random_string
+from django.contrib.auth.forms import PasswordResetForm
 User = get_user_model()
 # Create your views here.
 
@@ -259,11 +260,16 @@ def register(request):
 
             try:
                 email.send()
-                return JsonResponse({'ok':"You have successfully registered. Please check your email!"})
+                return JsonResponse({'ok': "You have successfully registered. Please check your email!"})
             except Exception as e:
                 return HttpResponse(f"Error sending email: {str(e)}")
         else:
-            return JsonResponse({'error': 'Please check the email address'})
+            errors = {
+                'email': form.errors.get('email', None),
+                'password1': form.errors.get('password1', None),
+                'password2': form.errors.get('password2', None),
+            }
+            return JsonResponse({'error': errors})
 
     else:
         form = CustomUserCreationForm()
